@@ -5,7 +5,21 @@
              ponte H, através do protocolo serial
 */
 
-#include <FastLED.h> // Controle Fita Led
+// Libraries -------------------------------------------------------
+#include <elapsedMillis.h>
+#include <FastLED.h>
+
+#define PINLED A0
+
+#define NUM_LEDS 2
+#define SIZECOLORPALET 10
+
+#define TIMESTEP_COLOR 1000
+
+// Global Variables ------------------------------------------------
+
+// Timers
+elapsedMillis timerColor;
 
 // Fita LED
 CRGB leds[NUM_LEDS];
@@ -19,6 +33,8 @@ const CRGB colorPalet[] = {0xF7F7F7, // White Smoke
                            0x00F7E6, // Tuorquoise Blue
                            0xFA07F2, 
                            0xDD49B8};// Pink (PANTONE)
+
+unsigned int indexColor = 0;
 
 /*
   Aqui definimos a velocidade máxima dos motores porem isso 
@@ -61,6 +77,12 @@ void setup() {
   pinMode(vel_esq,OUTPUT);
   pinMode(vel_dir,OUTPUT);
 
+  // Inicializa Fita Led
+  FastLED.addLeds<WS2811, PINLED, BRG>(leds, NUM_LEDS);
+
+  // Reset all index
+  indexColor = 0;
+
   // Inicializa a comunicação serial em 9600 bits.
   Serial.begin(9600);
 }
@@ -70,6 +92,16 @@ void loop() {
   if (Serial.available() > 0) {
     state  = Serial.read();
     Serial.write(state);
+  }
+
+  // Select Color
+  if( timerColor > TIMESTEP_COLOR)
+  {
+    timerColor = 0; // Reset Timer
+    indexColor = (indexColor<9)? indexColor +1 : 0;
+
+    fill_solid(leds,NUM_LEDS,colorPalet[indexColor]);
+    FastLED.show();
   }
 
   /*
