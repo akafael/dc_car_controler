@@ -4,18 +4,21 @@
              carro bluetooth montado em arduino com uma shield 
              ponte H, através do protocolo serial
 */
-/*
-  É necessario incluir a biblioteca 'AFMotor' pois simplifica o 
-  uso da Shield ponte H
-*/
 
-//#include <AFMotor.h>
+#include <FastLED.h> // Controle Fita Led
 
-//selecionamos os canais 3 e 4 para motor direito e esquerdo
-//respectivamente
-
-//AF_DCMotor motor_dir(3);
-//AF_DCMotor motor_esq(4);
+// Fita LED
+CRGB leds[NUM_LEDS];
+const CRGB colorPalet[] = {0xF7F7F7, // White Smoke
+                           0xBA0034, // Crimson Glory
+                           0xF70035, // Carmine Red
+                           0xFA07F2,
+                           0xDD49B8, // Pink (PANTONE)
+                           0xF7F7F7, // White Smoke
+                           0x00BAAD, // Amazonite
+                           0x00F7E6, // Tuorquoise Blue
+                           0xFA07F2, 
+                           0xDD49B8};// Pink (PANTONE)
 
 /*
   Aqui definimos a velocidade máxima dos motores porem isso 
@@ -24,8 +27,8 @@
   equivalente a 255, por PWM os motores receberão tensão 
   total da fonte que estiver utilizando.
 */
-#define FatCorr 0.75
 
+#define FatCorr 0.75
 #define vel_dir 10
 #define vel_esq 11
 #define Vmax 255
@@ -36,13 +39,11 @@ int vel = 127;
    e esquerdo
 */
 
-//int vSpeed_dir = 200; 
-//int vSpeed_esq = 200;
-
 #define Farol_dianteiro 8
 #define Farol_traseiro 7
 #define Pisca_alerta 2
 #define buzina 13
+
 //variável que atribuimos a leitura Serial do módulo bluetooth
 #define IN1 3
 #define IN2 5
@@ -52,14 +53,16 @@ int vel = 127;
 char state;
 
 void setup() {
-  // Inicializa a comunicação serial em 9600 bits.
-  Serial.begin(9600);
+  // Inicializa Pinos
   pinMode(IN1,OUTPUT);
   pinMode(IN2,OUTPUT);
   pinMode(IN3,OUTPUT);
   pinMode(IN4,OUTPUT);
   pinMode(vel_esq,OUTPUT);
   pinMode(vel_dir,OUTPUT);
+
+  // Inicializa a comunicação serial em 9600 bits.
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -217,4 +220,14 @@ void loop() {
   else if (state == 'x') {   // Se o estado recebido for igual a 'x', Pisca alerta apaga.
     
   }
+}
+
+void moveCarroFrente()
+{
+  digitalWrite(IN1,1);
+  digitalWrite(IN2,0);
+  digitalWrite(IN3,0);
+  digitalWrite(IN4,1);
+  digitalWrite(vel_dir,vel * FatCorr);
+  digitalWrite(vel_esq,vel);
 }
